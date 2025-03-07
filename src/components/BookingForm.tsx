@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, MapPin, Check } from "lucide-react";
@@ -19,6 +18,8 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { bookingService } from "@/services/bookingService";
+import { BookingFormData } from "@/types/booking";
 
 const locations = [
   "New York City Airport",
@@ -35,6 +36,7 @@ const BookingForm = () => {
   const [pickupLocation, setPickupLocation] = useState("");
   const [returnLocation, setReturnLocation] = useState("");
   const [sameLocation, setSameLocation] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,9 +46,36 @@ const BookingForm = () => {
       return;
     }
     
-    toast.success("Booking request submitted successfully!", {
-      description: "We'll get back to you shortly with available cars.",
-    });
+    setIsSubmitting(true);
+    
+    try {
+      const bookingData: BookingFormData = {
+        pickupDate: pickupDate.toISOString(),
+        returnDate: returnDate.toISOString(),
+        pickupLocation,
+        returnLocation: sameLocation ? pickupLocation : returnLocation,
+      };
+      
+      const newBooking = bookingService.saveBooking(bookingData);
+      
+      toast.success("Booking request submitted successfully!", {
+        description: `Booking ID: ${newBooking.id.slice(0, 8)}. We'll get back to you shortly.`,
+      });
+      
+      // Reset form
+      setPickupDate(undefined);
+      setReturnDate(undefined);
+      setPickupLocation("");
+      setReturnLocation("");
+      setSameLocation(true);
+    } catch (error) {
+      toast.error("Failed to save booking", {
+        description: "Please try again later.",
+      });
+      console.error("Booking error:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -208,8 +237,13 @@ const BookingForm = () => {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full md:w-auto md:px-8" size="lg">
-                Find Available Cars
+              <Button 
+                type="submit" 
+                className="w-full md:w-auto md:px-8" 
+                size="lg" 
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Processing..." : "Find Available Cars"}
               </Button>
             </form>
           </motion.div>
