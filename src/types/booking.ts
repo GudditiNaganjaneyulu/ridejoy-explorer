@@ -1,6 +1,9 @@
 
 export interface Booking {
   id: string;
+  name: string;
+  email: string;
+  address: string;
   pickupDate: string;
   returnDate: string;
   pickupLocation: string;
@@ -10,3 +13,11 @@ export interface Booking {
 }
 
 export type BookingFormData = Omit<Booking, 'id' | 'status' | 'createdAt'>;
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: 'user' | 'admin';
+  password: string;
+}

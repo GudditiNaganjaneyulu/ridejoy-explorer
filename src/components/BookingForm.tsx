@@ -1,9 +1,11 @@
+
 import { useState } from "react";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, MapPin, Check } from "lucide-react";
+import { Calendar as CalendarIcon, MapPin, Check, User, Mail, Home } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
@@ -31,6 +33,9 @@ const locations = [
 ];
 
 const BookingForm = () => {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [address, setAddress] = useState("");
   const [pickupDate, setPickupDate] = useState<Date>();
   const [returnDate, setReturnDate] = useState<Date>();
   const [pickupLocation, setPickupLocation] = useState("");
@@ -41,8 +46,15 @@ const BookingForm = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!pickupDate || !returnDate || !pickupLocation || (!sameLocation && !returnLocation)) {
+    if (!name || !email || !address || !pickupDate || !returnDate || !pickupLocation || (!sameLocation && !returnLocation)) {
       toast.error("Please fill in all required fields");
+      return;
+    }
+    
+    // Simple email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Please enter a valid email address");
       return;
     }
     
@@ -50,6 +62,9 @@ const BookingForm = () => {
     
     try {
       const bookingData: BookingFormData = {
+        name,
+        email,
+        address,
         pickupDate: pickupDate.toISOString(),
         returnDate: returnDate.toISOString(),
         pickupLocation,
@@ -63,6 +78,9 @@ const BookingForm = () => {
       });
       
       // Reset form
+      setName("");
+      setEmail("");
+      setAddress("");
       setPickupDate(undefined);
       setReturnDate(undefined);
       setPickupLocation("");
@@ -96,6 +114,52 @@ const BookingForm = () => {
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Name */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Your Name</label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <Input
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Enter your full name"
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Email */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Email Address</label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <Input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter your email address"
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Address */}
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-sm font-medium">Address</label>
+                  <div className="relative">
+                    <Home className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <Input
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      placeholder="Enter your address"
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+
                 {/* Pickup Date */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Pickup Date</label>
@@ -243,7 +307,7 @@ const BookingForm = () => {
                 size="lg" 
                 disabled={isSubmitting}
               >
-                {isSubmitting ? "Processing..." : "Find Available Cars"}
+                {isSubmitting ? "Processing..." : "Book Now"}
               </Button>
             </form>
           </motion.div>
