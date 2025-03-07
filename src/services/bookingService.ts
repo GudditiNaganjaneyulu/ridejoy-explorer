@@ -1,7 +1,11 @@
 
-import { Booking, BookingFormData, User } from "@/types/booking";
+import { Booking, BookingFormData } from "@/types/booking";
 import { userService } from "./userService";
 import { emailService } from "./emailService";
+
+// MongoDB integration placeholder
+// In a real implementation, this would connect to your MongoDB instance
+// For now, we'll continue using localStorage as a mock database
 
 // This simulates what would be MongoDB operations in a real backend
 export const bookingService = {
